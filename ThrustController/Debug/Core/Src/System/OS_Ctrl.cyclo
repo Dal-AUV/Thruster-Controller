@@ -1,0 +1,5 @@
+../Core/Src/System/OS_Ctrl.c:36:6:OS_TasksInit	2
+../Core/Src/System/OS_Ctrl.c:49:6:OS_QueuesInit	1
+../Core/Src/System/OS_Ctrl.c:55:6:OS_SemaphoreInit	1
+../Core/Src/System/OS_Ctrl.c:62:6:OS_MutexesInit	1
+../Core/Src/System/OS_Ctrl.c:68:13:OS_HeartbeatTask	1

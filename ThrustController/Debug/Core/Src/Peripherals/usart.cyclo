@@ -1,0 +1,6 @@
+../Core/Src/Peripherals/usart.c:47:6:UART_Init	1
+../Core/Src/Peripherals/usart.c:53:19:DEBUG_Write	2
+../Core/Src/Peripherals/usart.c:70:6:HAL_UART_RxCpltCallback	2
+../Core/Src/Peripherals/usart.c:78:6:HAL_UART_TxCpltCallback	2
+../Core/Src/Peripherals/usart.c:102:13:MX_USART2_UART_Init	2
+../Core/Src/Peripherals/usart.c:123:19:UART_DMA_Write	2
