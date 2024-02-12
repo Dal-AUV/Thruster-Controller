@@ -13,129 +13,88 @@
   * in the root directory of this software component.
   * If no LICENSE file comes with this software, it is provided AS-IS.
   *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-/* Includes ------------------------------------------------------------------*/
+  ******************************************************************************/
+
+/* How to set up a PWM Signal using generated code in STM32:
+ *
+ * Helpful links:
+ * https://www.youtube.com/watch?v=OwlfFp8fPN0
+ * https://www.youtube.com/watch?v=AjN58ceQaF4
+ *
+ * IOC -> System core -> RCC
+ * 							set HSE using either Bypass Clock or Crystal Oscillator
+ * 							(if using Crystal Oscillator check frequency on board or in documentation)
+ *
+ * 	   -> Clock Configuration -> set clock configuration (check if already set)
+ *
+ *
+ * IOC -> Pinout & Configuration -> Timers -> pick a timer (TIM2 chosen in this code)
+ * 								    Channel 1: PWM Generation CH 1
+ *
+ * 										Then scroll down:
+ * 										      Prescaler: 0 (+1 for actual prescaler value)
+ * 										      Counter Mode: Up
+ * 										      Counter Period: 255
+ * 										      Auto Reload Register (ARR): Enable
+ *
+ * 										      Mode: PWM mode 1
+ * 										      Pulse: 127 (sets duty cycle, 50% in this case)
+ * 										      Output Compare Preload: Enable
+ * 										      Fast Mode: Disable
+ * 										      CH POlarity: High
+ * 	Equations for calculating PWM:
+ * 	Timer Clock = (APB Timer Clock)/ Prescaler
+ * 	Frequency = (Timer Clock) / ARR
+ * 	Duty (%) = (Capture Compare Register (CCRx))/(ARR) * 100%
+ * 	OR
+ * 	Duty cycle (%) = Pulse/(Counter Period) * 100%
+ *
+ *  Generate code, and then can check board on the right to see which pin has PWM signal.
+ *  In this case: TIM2_CH1 for PA0
+ *
+ */
+
+
 #include "main.h"
-#include "cmsis_os.h"
 
-#include "Peripherals/dma.h"
-#include "Peripherals/usart.h"
-#include "System/OS_Ctrl.h"
+/* This main() creates a PWM signal of varying length, where the duty cycle increases from 0% to around 80% */
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
 
-/* USER CODE END Includes */
+// Timer 2
+TIM_HandleTypeDef htim2;
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
+// Generated functions
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_TIM2_Init(void);
 
-/* USER CODE BEGIN PFP */
+int pulse_width=0;
 
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+  HAL_Init(); //initialize timer
 
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
-  UART_Init();
-  OS_QueuesInit();
-  OS_MutexesInit();
-  OS_SemaphoreInit();
-  OS_TasksInit();
-  vTaskStartScheduler();
-  /* USER CODE BEGIN 2 */
+  MX_TIM2_Init(); //Timer 2
 
-  /* USER CODE END 2 */
+  // Start generating the PWM signal
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
-  /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
 
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
+  // Some variable to play around with the cycle with
 
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
-
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
-
-  /* Create the thread(s) */
-  /* definition and creation of defaultTask */
-
-  /* We should never get here as control is now taken by the scheduler */
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
 }
 
-/**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+
+
+
+
+
+
+/* Code starting here are the generated functions */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -171,10 +130,82 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief GPIO Initialization Function
+  * @brief TIM2 Initialization Function
   * @param None
   * @retval None
   */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 255;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+
+
+  /* Place where you can configure the Pulse value in the initialization */
+  sConfigOC.Pulse = pulse_width;////////////////////////////////////
+
+
+
+
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
+}
+
+/**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+
+
+/**
+  * Enable DMA controller clock
+  */
+
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -213,22 +244,6 @@ static void MX_GPIO_Init(void)
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */
-}
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -240,19 +255,4 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
-}
-#endif /* USE_FULL_ASSERT */
+
